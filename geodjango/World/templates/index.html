@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    {%load leaflet_tags%}
+    {%leaflet_js%}
+    {%leaflet_css%}
+    <style>
+        #gis{
+        width:80%;
+        height:500px;
+        }
+
+        .leaflet-container {
+    background: #ddd;
+    outline: 0;
+}
+    </style>
+    <meta charset="UTF-8">
+    <title>My Homepage</title>
+
+</head>
+<body>
+  <h1>My Map:</h1><h3>Visualizing population around the world</h3>
+  <script src="{% static "world.geojson" %}" ></script>
+  <script>
+  function countryColor(x){
+   if(x>100000000){
+   return 'red';}
+   else if(x>50000000){
+   return 'blue';
+   }
+   else {
+   return 'gray';
+   }
+
+  }
+  function country_style(feature){
+
+  return{
+    fillColor:countryColor(feature.properties.pop_est),
+    weight:2,
+    opacity:1,
+    color:'white',
+    dashArray:3,
+    fillOpacity:0.7
+  }
+  }
+  function start(map,options){
+   var layer=L.geoJson(countries,{style:country_style}).addTo(map);
+   var legend=L.control({position:'bottomright'});
+   legend.onAdd=function(map){
+    var div=L.DomUtil.create('div','legend');
+    var labels=["More Than 100 Million","More Than 50 Million","Less Than 50 Million"]
+    var grades=[100000001,50000001,50000000]
+    div.innerHTML='<div style="background:white"><b>Legend</b></div>';
+
+    for (var i=0;i<grades.length;i++){
+
+    var label=labels[i];
+    var col=countryColor(grades[i])
+     div.innerHTML+='<div style="background:white"><i style="background:'+col+'">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;'+label+'</div>'
+     console.log(label);
+    }
+return div;
+   }
+   legend.addTo(map);
+}
+  </script>
+  {%leaflet_map "gis" callback='window.start'%}
+</body>
+</html>
